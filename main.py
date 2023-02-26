@@ -1,15 +1,27 @@
 import os
 import tkinter.ttk
 from tkinter import *
-from turtle import RawTurtle
+from turtle import RawTurtle, TurtleScreen
 from PIL import Image, ImageTk
+import math
 
 import convertapi
 # this package is called python-dotenv in pip
 from dotenv import load_dotenv
 
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 500
+WINDOW_HEIGHT = 600
+BLACK = "#000000"
+GREY = "#808080"
+BROWN = "#964B00"
+RED = "#FF0000"
+ORANGE = "#FFA500"
+YELLOW = "#FFFF00"
+GREEN = "#00FF00"
+BLUE = "#0000FF"
+PURPLE = "#A020F0"
+
+COLOR_BUTTON_HEIGHT = 25
 delete_ps_choice = None
 deleted_ps_file_path = ""
 load_image_selection = ""
@@ -38,12 +50,13 @@ notebook.add(gallery_frame, text="Gallery")
 
 # Drawing Title
 drawing_title_label = Label(master=drawing_exporting_frame, textvariable=drawing_name_text, fg="White", bg="Black")
-drawing_title_label.grid(column=0, row=0, columnspan=8, sticky="EW")
+drawing_title_label.grid(column=0, row=0, columnspan=9, sticky="EW")
 
 # Turtle Drawing Canvas
-canvas = Canvas(master=drawing_exporting_frame, width=WINDOW_WIDTH, height=WINDOW_HEIGHT - 100)
-canvas.grid(column=0, row=1, columnspan=8)
-artist = RawTurtle(canvas)
+canvas = Canvas(master=drawing_exporting_frame, width=WINDOW_WIDTH, height=WINDOW_HEIGHT - 100 - COLOR_BUTTON_HEIGHT)
+canvas.grid(column=0, row=1, columnspan=9)
+drawing_screen = TurtleScreen(canvas)
+artist = RawTurtle(drawing_screen)
 
 # Terminal Yes Button
 yes_button = Button(master=drawing_exporting_frame, text="Y")
@@ -53,28 +66,83 @@ no_button = Button(master=drawing_exporting_frame, text="N")
 
 # Terminal Label
 terminal_label = Label(master=drawing_exporting_frame, textvariable=terminal_text, fg="White", bg="Black")
-terminal_label.grid(column=0, row=2, columnspan=8, sticky="EW")
+terminal_label.grid(column=0, row=2, columnspan=9, sticky="EW")
 
 # Entry Field
 entry_field = Entry(master=drawing_exporting_frame, textvariable=entry_text)
-entry_field.grid(column=0, row=3, columnspan=6, sticky="EW")
+entry_field.grid(column=0, row=3, columnspan=7, sticky="EW")
 
 # Entry Confirmation Button
 confirmation_button = Button(master=drawing_exporting_frame, text="Enter")
-confirmation_button.grid(column=6, row=3, sticky="EW")
+confirmation_button.grid(column=7, row=3, sticky="EW")
 
 # Entry Reset Button
 reset_button = Button(master=drawing_exporting_frame, text="Reset")
-reset_button.grid(column=7, row=3, sticky="EW")
+reset_button.grid(column=8, row=3, sticky="EW")
 
 # Draw Button
-draw_button = Button(master=drawing_exporting_frame, text="Draw")
-draw_button.grid(column=0, row=4, columnspan=4, sticky="EW")
+draw_button = Button(master=drawing_exporting_frame, text="Circle")
+draw_button.grid(column=0, row=4, columnspan=1, sticky="EW")
+
+# Penup Button
+penup_button = Button(master=drawing_exporting_frame, text="Pen Up", command=lambda: artist.penup())
+penup_button.grid(column=1, row=4, columnspan=1, sticky="EW")
+
+# Pendown Button
+pendown_button = Button(master=drawing_exporting_frame, text="Pen Down", command=lambda: artist.pendown())
+pendown_button.grid(column=2, row=4, columnspan=1, sticky="EW")
+
+# Brush Size Buttons
+increase_brush_size_button = Button(master=drawing_exporting_frame, text="+",
+                                    command=lambda: artist.pensize(artist.pen()['pensize'] + 1))
+increase_brush_size_button.grid(column=3, row=4, columnspan=1, sticky="EW")
+
+decrease_brush_size_button = Button(master=drawing_exporting_frame, text="-",
+                                    command=lambda: artist.pensize(abs(artist.pen()['pensize'] - 1)))
+decrease_brush_size_button.grid(column=4, row=4, columnspan=1, sticky="EW")
 
 # Export Button
 export_button = Button(master=drawing_exporting_frame, text="Export")
 # export_button.grid(column=5, row=4, columnspan=4, sticky="EW")
 export_button["state"] = DISABLED
+
+# Color Selection Buttons
+
+black_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(BLACK),
+                      background=BLACK, highlightthickness=0, borderwidth=0)
+black_button.grid(column=0, row=5, sticky="EW")
+
+grey_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(GREY),
+                     background=GREY, highlightthickness=0, borderwidth=0)
+grey_button.grid(column=1, row=5, sticky="EW")
+
+brown_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(BROWN),
+                      background=BROWN, highlightthickness=0, borderwidth=0)
+brown_button.grid(column=2, row=5, sticky="EW")
+
+red_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(RED), background=RED,
+                    highlightthickness=0, borderwidth=0)
+red_button.grid(column=3, row=5, sticky="EW")
+
+orange_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(ORANGE), background=ORANGE,
+                       highlightthickness=0, borderwidth=0)
+orange_button.grid(column=4, row=5, sticky="EW")
+
+yellow_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(YELLOW), background=YELLOW,
+                       highlightthickness=0, borderwidth=0)
+yellow_button.grid(column=5, row=5, sticky="EW")
+
+green_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(GREEN), background=GREEN,
+                      highlightthickness=0, borderwidth=0)
+green_button.grid(column=6, row=5, sticky="EW")
+
+blue_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(BLUE), background=BLUE,
+                     highlightthickness=0, borderwidth=0)
+blue_button.grid(column=7, row=5, sticky="EW")
+
+purple_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(PURPLE), background=PURPLE,
+                       highlightthickness=0, borderwidth=0)
+purple_button.grid(column=8, row=5, sticky="EW")
 
 # Gallery Frame Widgets
 
@@ -104,13 +172,13 @@ def update_terminal(text):
 
 def toggle_answer_layout(is_choice_layout_hidden):
     if not is_choice_layout_hidden:
-        no_button.grid(column=7, row=2, sticky="EW")
-        yes_button.grid(column=6, row=2, sticky="EW")
+        no_button.grid(column=8, row=2, sticky="EW")
+        yes_button.grid(column=7, row=2, sticky="EW")
         terminal_label.grid_forget()
-        terminal_label.grid(column=0, row=2, columnspan=6, sticky="EW")
+        terminal_label.grid(column=0, row=2, columnspan=7, sticky="EW")
     else:
         terminal_label.grid_forget()
-        terminal_label.grid(column=0, row=2, columnspan=8, sticky="EW")
+        terminal_label.grid(column=0, row=2, columnspan=9, sticky="EW")
         no_button.grid_forget()
         yes_button.grid_forget()
 
@@ -137,7 +205,7 @@ def validate_entry():
         update_terminal(f"valid name entry ")
         drawing_name_text.set(text.title())
         export_button["state"] = NORMAL
-        export_button.grid(column=5, row=4, columnspan=4, sticky="EW")
+        export_button.grid(column=7, row=4, columnspan=2, sticky="EW")
         return True
 
 
@@ -246,6 +314,11 @@ def callback(event):
         load_image_button["state"] = DISABLED
 
 
+def move_artist(x, y):
+    artist.setpos(x, y)
+
+
+drawing_screen.onclick(move_artist)
 drawing_list.bind('<<ListboxSelect>>', callback)
 load_image_button.config(command=load_image)
 load_gallery_images()

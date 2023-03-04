@@ -1,9 +1,9 @@
 import os
 import tkinter.ttk
+import random
 from tkinter import *
 from turtle import RawTurtle, TurtleScreen
 from PIL import Image, ImageTk
-import math
 
 import convertapi
 # this package is called python-dotenv in pip
@@ -20,6 +20,7 @@ YELLOW = "#FFFF00"
 GREEN = "#00FF00"
 BLUE = "#0000FF"
 PURPLE = "#A020F0"
+COLORS = [BLACK, GREY, BROWN, RED, ORANGE, YELLOW, GREEN, BLUE, PURPLE]
 
 COLOR_BUTTON_HEIGHT = 25
 delete_ps_choice = None
@@ -30,6 +31,9 @@ load_image_selection = ""
 window = Tk()
 
 terminal_text = StringVar()
+random_color_state = StringVar()
+is_color_random = False
+random_color_state.set("Random Color (OFF)")
 entry_text = StringVar()
 drawing_name_text = StringVar()
 window.title("Turtle Draws")
@@ -85,21 +89,29 @@ draw_button = Button(master=drawing_exporting_frame, text="Circle")
 draw_button.grid(column=0, row=4, columnspan=1, sticky="EW")
 
 # Penup Button
-penup_button = Button(master=drawing_exporting_frame, text="Pen Up", command=lambda: artist.penup())
+penup_button = Button(master=drawing_exporting_frame, text="Pen Up")
 penup_button.grid(column=1, row=4, columnspan=1, sticky="EW")
 
 # Pendown Button
-pendown_button = Button(master=drawing_exporting_frame, text="Pen Down", command=lambda: artist.pendown())
+pendown_button = Button(master=drawing_exporting_frame, text="Pen Down")
 pendown_button.grid(column=2, row=4, columnspan=1, sticky="EW")
+pendown_button["state"] = DISABLED
 
 # Brush Size Buttons
-increase_brush_size_button = Button(master=drawing_exporting_frame, text="+",
-                                    command=lambda: artist.pensize(artist.pen()['pensize'] + 1))
+increase_brush_size_button = Button(master=drawing_exporting_frame, text="+")
 increase_brush_size_button.grid(column=3, row=4, columnspan=1, sticky="EW")
 
-decrease_brush_size_button = Button(master=drawing_exporting_frame, text="-",
-                                    command=lambda: artist.pensize(abs(artist.pen()['pensize'] - 1)))
+decrease_brush_size_button = Button(master=drawing_exporting_frame, text="-")
 decrease_brush_size_button.grid(column=4, row=4, columnspan=1, sticky="EW")
+decrease_brush_size_button["state"] = DISABLED
+
+# Clear Canvas Button
+clear_button = Button(master=drawing_exporting_frame, text="Clear", command=lambda: artist.clear())
+clear_button.grid(column=5, row=4, columnspan=1, sticky="EW")
+
+# Random Button
+random_button = Button(master=drawing_exporting_frame, textvariable=random_color_state)
+random_button.grid(column=6, row=4, columnspan=1, sticky="EW")
 
 # Export Button
 export_button = Button(master=drawing_exporting_frame, text="Export")
@@ -107,7 +119,6 @@ export_button = Button(master=drawing_exporting_frame, text="Export")
 export_button["state"] = DISABLED
 
 # Color Selection Buttons
-
 black_button = Button(master=drawing_exporting_frame, command=lambda: artist.color(BLACK),
                       background=BLACK, highlightthickness=0, borderwidth=0)
 black_button.grid(column=0, row=5, sticky="EW")
@@ -211,6 +222,8 @@ def validate_entry():
 
 def draw():
     update_terminal("drawing...")
+    if is_color_random:
+        artist.color(random.choice(COLORS))
     artist.circle(radius=50)
 
 
@@ -315,9 +328,50 @@ def callback(event):
 
 
 def move_artist(x, y):
+    if is_color_random:
+        artist.color(random.choice(COLORS))
     artist.setpos(x, y)
 
 
+def pen_up():
+    artist.penup()
+    penup_button["state"] = DISABLED
+    pendown_button["state"] = NORMAL
+    pass
+
+
+def pen_down():
+    artist.pendown()
+    penup_button["state"] = NORMAL
+    pendown_button["state"] = DISABLED
+
+
+def random_color():
+    global is_color_random
+    is_color_random = not is_color_random
+    if is_color_random:
+        random_color_state.set("Random Color (ON)")
+    else:
+        random_color_state.set("Random Color (OFF)")
+
+
+def increase_brush_size():
+    artist.pensize(artist.pen()['pensize'] + 1)
+    decrease_brush_size_button["state"] = NORMAL
+    pass
+
+
+def decrease_brush_size():
+    if artist.pen()['pensize'] - 1 <= 1:
+        decrease_brush_size_button["state"] = DISABLED
+    artist.pensize(abs(artist.pen()['pensize'] - 1))
+
+
+increase_brush_size_button.config(command=increase_brush_size)
+decrease_brush_size_button.config(command=decrease_brush_size)
+random_button.config(command=random_color)
+penup_button.config(command=pen_up)
+pendown_button.config(command=pen_down)
 drawing_screen.onclick(move_artist)
 drawing_list.bind('<<ListboxSelect>>', callback)
 load_image_button.config(command=load_image)
